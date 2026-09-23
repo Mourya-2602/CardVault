@@ -6,11 +6,8 @@ import 'api_config.dart';
 import 'error_mapper.dart';
 
 class ApiClient {
-  ApiClient({
-    required ApiConfig config,
-    required this._sessionStore,
-    Dio? dio,
-  }) : dio = dio ?? Dio(BaseOptions(baseUrl: config.baseUrl)) {
+  ApiClient({required ApiConfig config, required this._sessionStore, Dio? dio})
+    : dio = dio ?? Dio(BaseOptions(baseUrl: config.baseUrl)) {
     this.dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
