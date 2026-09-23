@@ -3,11 +3,15 @@
 CardVault is a Flutter banking capstone project for managing debit and credit
 cards securely.
 
-## Version 0: Project Setup
+## Current Version: Version 1
 
-This version establishes the Flutter application, baseline linting, core
-dependency configuration, and the planned feature-first directory structure.
-Business features and navigation begin in Version 1.
+Version 0 established the Flutter application, baseline linting, core
+dependency configuration, and the feature-first directory structure.
+
+Version 1 adds the app foundation: Material 3 theming, Riverpod's provider
+scope, `go_router`, protected route definitions, placeholder screens, and a
+session-driven route guard. Authentication and backend behavior are deferred
+to Version 2.
 
 ## Requirements
 
