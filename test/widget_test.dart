@@ -1,19 +1,33 @@
 import 'package:cardvault/app/app.dart';
-import 'package:cardvault/core/security/secure_session_store.dart';
+import 'package:cardvault/core/network/api_client.dart';
 import 'package:cardvault/features/auth/data/auth_repository.dart';
+import 'package:cardvault/core/security/secure_session_store.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'helpers/scripted_adapter.dart';
+import 'helpers/scripted_client.dart';
 
 void main() {
-  const app = CardVaultApp();
-
   ProviderScope buildTestApp() {
+    final store = InMemorySessionStore();
     return ProviderScope(
       overrides: [
-        secureSessionStoreProvider.overrideWithValue(InMemorySessionStore()),
+        secureSessionStoreProvider.overrideWithValue(store),
+        apiClientProvider.overrideWithValue(
+          scriptedClient((options) async {
+            if (options.path == '/auth/login') {
+              return const ResponseSpec(
+                statusCode: 200,
+                body: {'token': 'test-token', 'email': 'demo@cardvault.local'},
+              );
+            }
+            return const ResponseSpec(statusCode: 404, body: {});
+          }),
+        ),
       ],
-      child: app,
+      child: const CardVaultApp(),
     );
   }
 

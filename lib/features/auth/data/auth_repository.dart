@@ -4,15 +4,16 @@ import '../../../core/errors/bank_error.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/api_config.dart';
 import '../../../core/security/secure_session_store.dart';
+import '../../../core/utils/json.dart';
 
 class AuthRepository {
-  AuthRepository({required this._sessionStore, required this._apiClient});
+  AuthRepository({required this.sessionStore, required this.apiClient});
 
-  final SessionStore _sessionStore;
-  final ApiClient _apiClient;
+  final SessionStore sessionStore;
+  final ApiClient apiClient;
 
   Future<bool> restoreSession() async {
-    final token = await _sessionStore.readToken();
+    final token = await sessionStore.readToken();
     return token != null && token.isNotEmpty;
   }
 
@@ -23,25 +24,21 @@ class AuthRepository {
       );
     }
 
-    if (email.trim().toLowerCase() != 'demo@cardvault.local' ||
-        password != 'cardvault') {
-      throw const UnauthorizedBankError(
-        message: 'The email or password is incorrect.',
+    await runApi(apiClient, () async {
+      final response = await apiClient.post<Map<String, dynamic>>(
+        '/auth/login',
+        data: {'email': email.trim(), 'password': password},
       );
-    }
-
-    await _sessionStore.writeToken('local-preview-session');
+      final body = asJsonMap(response.data);
+      final token = body['token'] as String?;
+      if (token == null || token.isEmpty) {
+        throw const UnknownBankError();
+      }
+      await sessionStore.writeToken(token);
+    });
   }
 
-  Future<void> logout() => _sessionStore.clear();
-
-  Future<void> checkApiAvailability() async {
-    try {
-      await _apiClient.get<void>('/health');
-    } catch (error) {
-      throw _apiClient.mapError(error);
-    }
-  }
+  Future<void> logout() => sessionStore.clear();
 }
 
 final apiConfigProvider = Provider<ApiConfig>((ref) {

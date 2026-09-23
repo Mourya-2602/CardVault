@@ -3,7 +3,7 @@
 CardVault is a Flutter banking capstone project for managing debit and credit
 cards securely.
 
-## Current Version: Version 3
+## Current Version: Version 4
 
 Version 0 established the Flutter application, baseline linting, core
 dependency configuration, and the feature-first directory structure.
@@ -14,11 +14,26 @@ session-driven route guard.
 
 Version 2 adds environment-driven API configuration, Dio interceptors, mapped
 `BankError` values, secure session storage, session restoration, and a real
-login form. Until Version 4's mock backend is available, the repository uses
-an explicit local preview credential: `demo@cardvault.local` / `cardvault`.
+login form.
 
 Version 3 adds immutable CardVault domain models, UTC-to-local date conversion,
 Indian currency formatting, integer-paise parsing, and validation utilities.
+
+Version 4 connects repositories to a local mock Node API. Login now issues a
+real token. Repositories convert Dio failures into `BankError` and never expose
+raw HTTP exceptions to the UI.
+
+Start the mock API, then the app:
+
+```text
+node mock_api/server.mjs
+flutter run --dart-define=APP_ENV=dev --dart-define=API_BASE_URL=http://127.0.0.1:3000
+```
+
+Demo login: `demo@cardvault.local` / `cardvault`
+
+Simulate failures with header `X-CardVault-Simulate`:
+`401`, `403`, `404`, `409`, `422`, `500`, or `timeout`.
 
 Run with an environment override when needed:
 

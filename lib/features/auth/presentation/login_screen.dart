@@ -108,7 +108,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 12),
                   const Text(
-                    'Local preview: demo@cardvault.local / cardvault',
+                    'Demo: demo@cardvault.local / cardvault',
                     textAlign: TextAlign.center,
                   ),
                 ],
