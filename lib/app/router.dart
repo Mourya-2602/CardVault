@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/state/session_provider.dart';
 import 'routes.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final session = ref.watch(sessionProvider);
-
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: AppRoutes.login,
     redirect: (context, state) {
+      final session = ref.read(sessionProvider);
       final isLoginRoute = state.matchedLocation == AppRoutes.login;
 
       if (!session.isAuthenticated && !isLoginRoute) {
@@ -24,7 +24,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const LoginPlaceholderScreen(),
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: AppRoutes.cards,
@@ -72,25 +72,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+
+  ref.listen(sessionProvider, (_, _) => router.refresh());
+  ref.onDispose(router.dispose);
+  return router;
 });
-
-class LoginPlaceholderScreen extends ConsumerWidget {
-  const LoginPlaceholderScreen({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('CardVault')),
-      body: Center(
-        child: FilledButton(
-          onPressed: () =>
-              ref.read(sessionProvider.notifier).signInForPreview(),
-          child: const Text('Enter preview'),
-        ),
-      ),
-    );
-  }
-}
 
 class PlaceholderScreen extends ConsumerWidget {
   const PlaceholderScreen({required this.title, super.key});
@@ -104,7 +90,12 @@ class PlaceholderScreen extends ConsumerWidget {
         title: Text(title),
         actions: [
           IconButton(
-            onPressed: () => ref.read(sessionProvider.notifier).signOut(),
+            onPressed: () async {
+              await ref.read(sessionProvider.notifier).signOut();
+              if (context.mounted) {
+                context.go(AppRoutes.login);
+              }
+            },
             tooltip: 'Log out',
             icon: const Icon(Icons.logout),
           ),
